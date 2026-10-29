@@ -1,0 +1,26 @@
+cat > .gitignore <<'EOF'
+# Python environments
+.venv/
+venv/
+env/
+
+# Python-generated files
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Test and tool caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Build artifacts and crash dumps
+/build/
+/dist/
+core
+core.*
+
+# Local model checkpoints and exported parameters
+*.safetensors
+/models/gpt2/*.bin
+EOF
