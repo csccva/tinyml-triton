@@ -1,54 +1,51 @@
+# python -m pytest -v -s tests/test_vector_add.py
+import pytest
 import torch
 import triton
-import triton.language as tl
+
+from tinyml_triton.kernels.elementwise import vector_add_kernel
 
 
-@triton.jit
-def vector_add_kernel(
-    X,
-    Y,
-    Z,
-    N,
-    BLOCK_SIZE: tl.constexpr,
-):
-    pid = tl.program_id(0)
-    offsets = pid * BLOCK_SIZE + tl.arange(0, BLOCK_SIZE)
-    mask = offsets < N
+@pytest.mark.parametrize("n_elements", [
+    1,
+    256,
+    257,
+    4096,
+    10_000_003,
+])
+def test_vector_add(n_elements):
+    # 1. Verify that the XPU is available.
+    
+    print("PyTorch:", torch.__version__)
+    print("Triton:", triton.__version__)
+    print("GPU available:", torch.xpu.is_available())
 
-    x = tl.load(X + offsets, mask=mask, other=0.0)
-    y = tl.load(Y + offsets, mask=mask, other=0.0)
+    if not torch.xpu.is_available():
+        raise RuntimeError("PyTorch cannot access the Intel GPU")
 
-    tl.store(Z + offsets, x + y, mask=mask)
+    print("GPU:", torch.xpu.get_device_name(0))
+    # 2. Create input tensors on the XPU.
+    a = torch.randn(n_elements, device="xpu", dtype=torch.float32)
+    b = torch.randn(n_elements, device="xpu", dtype=torch.float32)
+    # 3. Allocate the output tensor.
+    out = torch.empty_like(a)
 
+    # 4. Calculate the Triton launch grid.
+    # Hint: use triton.cdiv() and BLOCK_SIZE.
+    BLOCK_SIZE = 256
+    grid= lambda meta:(triton.cdiv(n_elements, BLOCK_SIZE),)
 
-def main():
-    n = 10_000_003
-    device = "xpu"
+    # 5. Launch vector_add_kernel.
+    vector_add_kernel[grid](a,b,out,n_elements,BLOCK_SIZE=256)
 
-    x = torch.randn(n, device=device)
-    y = torch.randn(n, device=device)
-    z = torch.empty_like(x)
-
-    grid = lambda meta: (triton.cdiv(n, meta["BLOCK_SIZE"]),)
-
-    vector_add_kernel[grid](
-        x, y, z, n,
-        BLOCK_SIZE=1024,
-    )
-
+    # 6. Synchronize the XPU.
     torch.xpu.synchronize()
 
-    reference = x.cpu() + y.cpu()
-    result = z.cpu()
-    max_error = (result - reference).abs().max().item()
+    # 7. Calculate an independent PyTorch reference.
+    expected = a + b
 
-    print(f"Device: {torch.xpu.get_device_name(0)}")
-    print(f"Elements: {n:,}")
-    print(f"Max absolute error: {max_error}")
-    print(f"Test passed: {torch.allclose(result, reference, rtol=1e-5, atol=1e-6)}")
+    # 8. Compare the kernel output against the reference.
+    max_error = (out - expected).abs().max().item()
 
-    assert torch.allclose(result, reference, rtol=1e-5, atol=1e-6)
-
-
-if __name__ == "__main__":
-    main()
+    print("Maximum error:", max_error)
+    torch.testing.assert_close(out, expected, rtol=1e-5, atol=1e-6)
