@@ -16,10 +16,12 @@ Fundamental tensor operations used throughout neural-network computations.
 
 | Operation | Description | Status |
 |---|---|---|
-| Addition | Elementwise tensor addition | Planned |
-| Subtraction | Elementwise tensor subtraction | Planned |
-| Multiplication | Elementwise tensor multiplication | Planned |
-| Scalar operations | Tensor operations involving scalar values | Planned |
+| Addition | Elementwise tensor addition | Implemented |
+| Subtraction | Elementwise tensor subtraction | Implemented |
+| Multiplication | Elementwise tensor multiplication | Implemented |
+| Division | Elementwise tensor division | Implemented |
+| Scalar multiplication | Tensor multiplied by a scalar | Implemented |
+| Scalar addition | Scalar added to a tensor | Implemented |
 
 ### 2.2 Reduction Operations
 
@@ -27,8 +29,8 @@ Operations that reduce one or more tensor dimensions.
 
 | Operation | Description | Status |
 |---|---|---|
-| Sum | Sum of tensor elements along a dimension | Planned |
-| Maximum | Maximum value along a dimension | Planned |
+| Sum | Sum of tensor elements | Implemented |
+| Maximum | Maximum value of tensor elements | Implemented |
 
 ### 2.3 Embedding Operations
 
@@ -44,8 +46,8 @@ Operations used for linear transformations and projections.
 
 | Operation | Description | Status |
 |---|---|---|
-| Matrix multiplication | General matrix multiplication (GEMM) | Planned |
-| Linear projection | Matrix multiplication followed by bias addition | Planned |
+| Matrix multiplication | General matrix multiplication (GEMM) | Implemented |
+| Linear projection | Matrix multiplication followed by bias addition | Implemented |
 
 ### 2.5 Activation Operations
 
@@ -53,7 +55,7 @@ Nonlinear functions used in neural-network layers.
 
 | Operation | Description | Status |
 |---|---|---|
-| GELU | GPT-2 GELU approximation (`gelu_new`) | Planned |
+| GELU | GPT-2 GELU approximation (`gelu_new`) | Implemented |
 
 ### 2.6 Normalization Operations
 
@@ -61,7 +63,7 @@ Operations used to normalize activations.
 
 | Operation | Description | Status |
 |---|---|---|
-| Layer normalization | Normalize tensor values across the hidden dimension | Planned |
+| Layer normalization | Normalize tensor values across the hidden dimension | Implemented |
 
 ### 2.7 Softmax Operations
 
@@ -69,7 +71,7 @@ Operations used to convert scores into normalized probability distributions.
 
 | Operation | Description | Status |
 |---|---|---|
-| Stable softmax | Numerically stable row-wise softmax | Planned |
+| Stable softmax | Numerically stable row-wise softmax | Implemented |
 
 ### 2.8 Tensor Layout Operations
 
